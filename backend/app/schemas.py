@@ -43,5 +43,10 @@ class FeedbackResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class FeedbackUpdate(BaseModel):
+    title: str
+    description: str
+    category: str
+
 class ManagerResponseCreate(BaseModel):
     response_text: str

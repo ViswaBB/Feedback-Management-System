@@ -3,7 +3,11 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import User, Feedback
-from app.schemas import FeedbackCreate, FeedbackResponse
+from app.schemas import (
+    FeedbackCreate,
+    FeedbackUpdate,
+    FeedbackResponse
+)
 from app.dependencies import get_current_user
 
 
@@ -49,3 +53,73 @@ def get_my_feedback(
     ).all()
 
     return feedback
+
+@router.get("/{feedback_id}", response_model=FeedbackResponse)
+def get_feedback(
+    feedback_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    feedback = db.query(Feedback).filter(
+        Feedback.id == feedback_id,
+        Feedback.employee_id == current_user.id
+    ).first()
+
+    if not feedback:
+        raise HTTPException(
+            status_code=404,
+            detail="Feedback not found"
+        )
+
+    return feedback
+
+@router.put("/{feedback_id}", response_model=FeedbackResponse)
+def update_feedback(
+    feedback_id: int,
+    feedback_data: FeedbackUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    feedback = db.query(Feedback).filter(
+        Feedback.id == feedback_id,
+        Feedback.employee_id == current_user.id
+    ).first()
+
+    if not feedback:
+        raise HTTPException(
+            status_code=404,
+            detail="Feedback not found"
+        )
+
+    feedback.title = feedback_data.title
+    feedback.description = feedback_data.description
+    feedback.category = feedback_data.category
+
+    db.commit()
+    db.refresh(feedback)
+
+    return feedback
+
+@router.delete("/{feedback_id}")
+def delete_feedback(
+    feedback_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    feedback = db.query(Feedback).filter(
+        Feedback.id == feedback_id,
+        Feedback.employee_id == current_user.id
+    ).first()
+
+    if not feedback:
+        raise HTTPException(
+            status_code=404,
+            detail="Feedback not found"
+        )
+
+    db.delete(feedback)
+    db.commit()
+
+    return {
+        "message": "Feedback deleted successfully"
+    }
