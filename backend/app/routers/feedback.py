@@ -1,0 +1,51 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models import User, Feedback
+from app.schemas import FeedbackCreate, FeedbackResponse
+from app.dependencies import get_current_user
+
+
+router = APIRouter(
+    prefix="/feedback",
+    tags=["Feedback"]
+)
+
+
+@router.post("/", response_model=FeedbackResponse)
+def create_feedback(
+    feedback_data: FeedbackCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != "employee":
+        raise HTTPException(
+            status_code=403,
+            detail="Only employees can submit feedback"
+        )
+
+    new_feedback = Feedback(
+        employee_id=current_user.id,
+        title=feedback_data.title,
+        description=feedback_data.description,
+        category=feedback_data.category,
+        status="Pending"
+    )
+
+    db.add(new_feedback)
+    db.commit()
+    db.refresh(new_feedback)
+
+    return new_feedback
+
+@router.get("/my", response_model=list[FeedbackResponse])
+def get_my_feedback(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    feedback = db.query(Feedback).filter(
+        Feedback.employee_id == current_user.id
+    ).all()
+
+    return feedback
