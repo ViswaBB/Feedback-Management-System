@@ -1,12 +1,16 @@
 from fastapi import FastAPI
 from sqlalchemy import text
 
-from app.database import engine
+from app.database import engine, Base
+from app import models
 
 app = FastAPI(
     title="Employee Feedback Management System",
     version="1.0.0"
 )
+
+
+Base.metadata.create_all(bind=engine)
 
 
 @app.get("/")
