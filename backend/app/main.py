@@ -3,14 +3,16 @@ from sqlalchemy import text
 
 from app.database import engine, Base
 from app import models
+from app.routers import auth
 
 app = FastAPI(
     title="Employee Feedback Management System",
     version="1.0.0"
 )
 
-
 Base.metadata.create_all(bind=engine)
+
+app.include_router(auth.router)
 
 
 @app.get("/")
