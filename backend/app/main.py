@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from sqlalchemy import text
-from app.routers import auth, feedback
+from app.routers import auth, feedback, manager
 from app.database import engine, Base
 from app import models
 from app.routers import auth
@@ -14,6 +14,7 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(auth.router)
 app.include_router(feedback.router)
+app.include_router(manager.router)
 
 
 @app.get("/")

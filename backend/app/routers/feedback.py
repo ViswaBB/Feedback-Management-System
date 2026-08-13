@@ -6,7 +6,8 @@ from app.models import User, Feedback
 from app.schemas import (
     FeedbackCreate,
     FeedbackUpdate,
-    FeedbackResponse
+    FeedbackResponse,
+    FeedbackDetailResponse
 )
 from app.dependencies import get_current_user
 
@@ -73,7 +74,10 @@ def get_feedback(
 
     return feedback
 
-@router.put("/{feedback_id}", response_model=FeedbackResponse)
+@router.get(
+    "/{feedback_id}",
+    response_model=FeedbackDetailResponse
+)
 def update_feedback(
     feedback_id: int,
     feedback_data: FeedbackUpdate,
