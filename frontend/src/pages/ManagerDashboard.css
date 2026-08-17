@@ -1,0 +1,61 @@
+.manager-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  padding: 40px;
+}
+
+.manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.manager-toolbar {
+  display: flex;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.manager-toolbar input,
+.manager-toolbar select {
+  padding: 11px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.manager-toolbar input {
+  width: 300px;
+}
+
+.manager-card {
+  background: white;
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+}
+
+.status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-pending {
+  background: #fff3cd;
+}
+
+.status-review {
+  background: #dbeafe;
+}
+
+.status-responded {
+  background: #dcfce7;
+}
+
+.status-resolved {
+  background: #d1fae5;
+}

@@ -41,6 +41,16 @@ class FeedbackStatus(str, Enum):
     RESPONDED = "Responded"
     RESOLVED = "Resolved"
 
+
+class ManagerResponseResponse(BaseModel):
+    id: int
+    manager_id: int
+    response_text: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
 class FeedbackResponse(BaseModel):
     id: int
     employee_id: int
@@ -49,9 +59,12 @@ class FeedbackResponse(BaseModel):
     category: str
     status: str
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    responses: list[ManagerResponseResponse] = []
+
+    class Config:
+        from_attributes = True
 
 class FeedbackUpdate(BaseModel):
     title: str
@@ -64,13 +77,7 @@ class ManagerResponseCreate(BaseModel):
     response_text: str
 
 
-class ManagerResponseResponse(BaseModel):
-    id: int
-    manager_id: int
-    response_text: str
-    created_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
 
 
 class FeedbackDetailResponse(BaseModel):
