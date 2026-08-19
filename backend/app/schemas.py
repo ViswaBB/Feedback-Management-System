@@ -92,3 +92,12 @@ class FeedbackDetailResponse(BaseModel):
     responses: list[ManagerResponseResponse] = []
 
     model_config = ConfigDict(from_attributes=True)
+
+class ManagerResponseSchema(BaseModel):
+    id: int
+    manager_id: int
+    response_text: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

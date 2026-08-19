@@ -1,81 +1,118 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getFeedback } from "../services/api";
+import { useLocation, useNavigate } from "react-router-dom";
+import "./FeedbackDetails.css";
 
 function FeedbackDetails() {
-  const { feedbackId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [feedback, setFeedback] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadFeedback();
-  }, [feedbackId]);
-
-  const loadFeedback = async () => {
-    try {
-      const data = await getFeedback(feedbackId);
-      console.log("FEEDBACK DATA:", data);
-
-      setFeedback(data);
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return <h2>Loading...</h2>;
-  }
+  const feedback = location.state?.feedback;
 
   if (!feedback) {
-    return <h2>Feedback not found</h2>;
+    return (
+      <div className="feedback-details-page">
+        <div className="feedback-details-card">
+          <h2>Feedback not found</h2>
+
+          <p>
+            Please open the feedback from the My Feedback page.
+          </p>
+
+          <button
+            className="back-button"
+            onClick={() => navigate("/employee/feedback")}
+          >
+            ← Back to My Feedback
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <button onClick={() => navigate("/employee/feedback")}>
-        ← Back
+    <div className="feedback-details-page">
+
+      <button
+        className="back-button"
+        onClick={() => navigate("/employee/feedback")}
+      >
+        ← Back to My Feedback
       </button>
 
-      <h1>{feedback.title}</h1>
+      <div className="feedback-details-card">
 
-      <p>
-        <strong>Category:</strong> {feedback.category}
-      </p>
+        {/* Header */}
+        <div className="details-header">
+          <h1>{feedback.title}</h1>
 
-      <p>
-        <strong>Description:</strong>
-      </p>
+          <span
+            className={`status ${
+              feedback.status === "Pending"
+                ? "status-pending"
+                : feedback.status === "Under Review"
+                ? "status-review"
+                : feedback.status === "Responded"
+                ? "status-responded"
+                : "status-resolved"
+            }`}
+          >
+            {feedback.status}
+          </span>
+        </div>
 
-      <p>{feedback.description}</p>
+        <hr />
 
-      <p>
-        <strong>Status:</strong> {feedback.status}
-      </p>
+        {/* Category */}
+        <p>
+          <strong>Category:</strong>{" "}
+          {feedback.category}
+        </p>
 
-      <hr />
+        {/* Description */}
+        <h3>Description</h3>
 
-      <h2>Manager Response</h2>
+        <p className="description">
+          {feedback.description}
+        </p>
 
-      {feedback.responses && feedback.responses.length > 0 ? (
-        feedback.responses.map((response) => (
-          <div key={response.id}>
-            <p>{response.response_text}</p>
+        {/* Date */}
+        <p className="feedback-date">
+          Submitted:{" "}
+          {new Date(
+            feedback.created_at
+          ).toLocaleString()}
+        </p>
 
-            <small>
-              Responded on{" "}
-              {new Date(
-                response.created_at
-              ).toLocaleDateString()}
-            </small>
-          </div>
-        ))
-      ) : (
-        <p>No response from manager yet.</p>
-      )}
+        <hr />
+
+        {/* Manager Response */}
+        <h2>Manager Response</h2>
+
+        {feedback.responses &&
+        feedback.responses.length > 0 ? (
+          feedback.responses.map((response) => (
+            <div
+              className="response-box"
+              key={response.id}
+            >
+              <p>
+                {response.response_text}
+              </p>
+
+              <small>
+                Responded on{" "}
+                {new Date(
+                  response.created_at
+                ).toLocaleString()}
+              </small>
+            </div>
+          ))
+        ) : (
+          <p className="no-response">
+            No response from the manager yet.
+          </p>
+        )}
+
+      </div>
     </div>
   );
 }

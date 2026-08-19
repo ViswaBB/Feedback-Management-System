@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMyFeedback } from "../services/api";
-import { Link } from "react-router-dom";
+import "./MyFeedback.css";
+
 function MyFeedback() {
   const navigate = useNavigate();
 
@@ -15,8 +16,12 @@ function MyFeedback() {
   const loadFeedback = async () => {
     try {
       const data = await getMyFeedback();
+
+      console.log("MY FEEDBACK:", data);
+
       setFeedback(data);
     } catch (error) {
+      console.error(error);
       alert(error.message);
     } finally {
       setLoading(false);
@@ -24,32 +29,78 @@ function MyFeedback() {
   };
 
   if (loading) {
-    return <h2>Loading feedback...</h2>;
+    return (
+      <div className="my-feedback-page">
+        <h2>Loading your feedback...</h2>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1>My Feedback</h1>
+    <div className="my-feedback-page">
 
-      <button onClick={() => navigate("/employee")}>
-        Back to Dashboard
-      </button>
+      <div className="my-feedback-header">
 
-      <br />
-      <br />
+        <div>
+          <h1>My Feedback</h1>
+          <p>
+            Track the feedback you have submitted.
+          </p>
+        </div>
+
+        <button
+          onClick={() => navigate("/employee")}
+        >
+          Back to Dashboard
+        </button>
+
+      </div>
 
       {feedback.length === 0 ? (
-        <p>You haven't submitted any feedback yet.</p>
+        <div className="empty-feedback">
+
+          <h2>No feedback yet</h2>
+
+          <p>
+            You haven't submitted any feedback.
+          </p>
+
+          <button
+            onClick={() =>
+              navigate("/employee/submit")
+            }
+          >
+            Submit Feedback
+          </button>
+
+        </div>
       ) : (
         feedback.map((item) => (
-          <div key={item.id}>
-            <hr />
 
-            <h2>
-            <Link to={`/employee/feedback/${item.id}`}>
-              {item.title}
-            </Link>
-          </h2>
+          <div
+            className="feedback-item"
+            key={item.id}
+          >
+
+            <div className="feedback-item-header">
+
+              <h2>{item.title}</h2>
+
+              <span
+                className={`status ${
+                  item.status === "Pending"
+                    ? "status-pending"
+                    : item.status === "Under Review"
+                    ? "status-review"
+                    : item.status === "Responded"
+                    ? "status-responded"
+                    : "status-resolved"
+                }`}
+              >
+                {item.status}
+              </span>
+
+            </div>
 
             <p>
               <strong>Category:</strong>{" "}
@@ -57,23 +108,41 @@ function MyFeedback() {
             </p>
 
             <p>
-              <strong>Description:</strong>{" "}
               {item.description}
             </p>
 
-            <p>
-              <strong>Status:</strong>{" "}
-              {item.status}
+            <p className="feedback-date">
+              Submitted:{" "}
+              {new Date(
+                item.created_at
+              ).toLocaleString()}
             </p>
 
-            <p>
-              <strong>Submitted:</strong>{" "}
-              {new Date(item.created_at).toLocaleDateString()}
-            </p>
+            <button
+              onClick={() => {
+                console.log(
+                  "Opening feedback:",
+                  item.id
+                );
+
+          navigate(
+            `/employee/feedback/${item.id}`,
+            {
+              state: {
+                feedback: item,
+              },
+            }
+          );
+              }}
+            >
+              View Details
+            </button>
 
           </div>
+
         ))
       )}
+
     </div>
   );
 }

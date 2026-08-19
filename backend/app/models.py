@@ -68,7 +68,8 @@ class Feedback(Base):
 
     responses = relationship(
         "ManagerResponse",
-        back_populates="feedback"
+        back_populates="feedback",
+        cascade="all, delete-orphan"
     )
 
 
@@ -79,7 +80,7 @@ class ManagerResponse(Base):
 
     feedback_id = Column(
         Integer,
-        ForeignKey("feedback.id"),
+        ForeignKey("feedback.id", ondelete="CASCADE"),
         nullable=False
     )
 
@@ -106,3 +107,5 @@ class ManagerResponse(Base):
         back_populates="responses",
         foreign_keys=[manager_id]
     )
+
+    

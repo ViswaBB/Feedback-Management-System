@@ -1,0 +1,77 @@
+.feedback-details-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  padding: 40px;
+}
+
+.back-button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.feedback-details-card {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.details-header h1 {
+  margin: 0;
+}
+
+.status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-pending {
+  background: #fff3cd;
+}
+
+.status-review {
+  background: #dbeafe;
+}
+
+.status-responded {
+  background: #dcfce7;
+}
+
+.status-resolved {
+  background: #d1fae5;
+}
+
+.description {
+  line-height: 1.6;
+}
+
+.feedback-date {
+  color: #777;
+  font-size: 13px;
+}
+
+.response-box {
+  background: #f1f5f9;
+  padding: 18px;
+  border-left: 4px solid #2563eb;
+  border-radius: 6px;
+}
+
+.no-response {
+  color: #777;
+  font-style: italic;
+}

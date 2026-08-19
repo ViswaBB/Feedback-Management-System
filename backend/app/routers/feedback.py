@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.models import User, Feedback
@@ -17,6 +17,10 @@ router = APIRouter(
     tags=["Feedback"]
 )
 
+
+# --------------------------------
+# CREATE FEEDBACK
+# --------------------------------
 
 @router.post("/", response_model=FeedbackResponse)
 def create_feedback(
@@ -44,27 +48,50 @@ def create_feedback(
 
     return new_feedback
 
+
+# --------------------------------
+# GET MY FEEDBACK
+# --------------------------------
+
 @router.get("/my", response_model=list[FeedbackResponse])
 def get_my_feedback(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    feedback = db.query(Feedback).filter(
-        Feedback.employee_id == current_user.id
-    ).all()
+    feedback = (
+        db.query(Feedback)
+        .options(joinedload(Feedback.responses))
+        .filter(
+            Feedback.employee_id == current_user.id
+        )
+        .all()
+    )
 
     return feedback
 
-@router.get("/{feedback_id}", response_model=FeedbackResponse)
+
+# --------------------------------
+# GET SINGLE FEEDBACK
+# --------------------------------
+
+@router.get(
+    "/{feedback_id}",
+    response_model=FeedbackResponse
+)
 def get_feedback(
     feedback_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    feedback = db.query(Feedback).filter(
-        Feedback.id == feedback_id,
-        Feedback.employee_id == current_user.id
-    ).first()
+    feedback = (
+        db.query(Feedback)
+        .options(joinedload(Feedback.responses))
+        .filter(
+            Feedback.id == feedback_id,
+            Feedback.employee_id == current_user.id
+        )
+        .first()
+    )
 
     if not feedback:
         raise HTTPException(
@@ -74,7 +101,12 @@ def get_feedback(
 
     return feedback
 
-@router.get(
+
+# --------------------------------
+# UPDATE FEEDBACK
+# --------------------------------
+
+@router.put(
     "/{feedback_id}",
     response_model=FeedbackDetailResponse
 )
@@ -103,6 +135,11 @@ def update_feedback(
     db.refresh(feedback)
 
     return feedback
+
+
+# --------------------------------
+# DELETE FEEDBACK
+# --------------------------------
 
 @router.delete("/{feedback_id}")
 def delete_feedback(

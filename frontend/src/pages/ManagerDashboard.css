@@ -2,60 +2,280 @@
   min-height: 100vh;
   background: #f5f7fb;
   padding: 40px;
+  box-sizing: border-box;
 }
 
 .manager-header {
+  max-width: 1100px;
+  margin: 0 auto 25px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+}
+
+.manager-header h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.manager-header p {
+  margin-top: 8px;
+  color: #666;
+}
+
+.logout-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  opacity: 0.85;
 }
 
 .manager-toolbar {
+  max-width: 1100px;
+  margin: 25px auto 15px;
   display: flex;
   gap: 15px;
-  margin: 20px 0;
 }
 
 .manager-toolbar input,
 .manager-toolbar select {
-  padding: 11px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  padding: 11px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  background: white;
+  font-size: 14px;
 }
 
 .manager-toolbar input {
-  width: 300px;
+  flex: 1;
+}
+
+.feedback-count {
+  max-width: 1100px;
+  margin: 15px auto;
+  color: #666;
+  font-size: 14px;
+}
+
+.feedback-list {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  gap: 18px;
 }
 
 .manager-card {
   background: white;
-  padding: 20px;
-  margin-bottom: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.card-header h3 {
+  margin: 0;
+}
+
+.feedback-description {
+  color: #555;
+  line-height: 1.5;
 }
 
 .status {
   display: inline-block;
-  padding: 5px 10px;
+  padding: 5px 11px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
 }
 
 .status-pending {
-  background: #fff3cd;
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .status-review {
   background: #dbeafe;
+  color: #1e40af;
 }
 
 .status-responded {
   background: #dcfce7;
+  color: #166534;
 }
 
 .status-resolved {
   background: #d1fae5;
+  color: #065f46;
+}
+
+.view-btn {
+  margin-top: 10px;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 7px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+}
+
+.view-btn:hover {
+  opacity: 0.9;
+}
+
+.empty-state {
+  max-width: 700px;
+  margin: 50px auto;
+  text-align: center;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+}
+
+.details-card {
+  max-width: 850px;
+  margin: 35px auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+}
+
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.details-header h2 {
+  margin: 0;
+}
+
+.details-header h3 {
+  margin-top: 8px;
+}
+
+.close-btn {
+  border: none;
+  background: #f1f5f9;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.details-description {
+  line-height: 1.7;
+  color: #444;
+}
+
+.status-select {
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  background: white;
+}
+
+.responses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.response-box {
+  padding: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+}
+
+.response-box p {
+  margin-top: 0;
+  line-height: 1.6;
+}
+
+.response-box small {
+  display: block;
+  color: #777;
+  margin-bottom: 15px;
+}
+
+.delete-response-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 8px 13px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-response-btn:hover {
+  opacity: 0.85;
+}
+
+.no-response {
+  color: #777;
+  font-style: italic;
+}
+
+.response-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+  margin-bottom: 12px;
+}
+
+.send-response-btn {
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 10px 17px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.send-response-btn:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 700px) {
+  .manager-page {
+    padding: 20px;
+  }
+
+  .manager-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .manager-toolbar {
+    flex-direction: column;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .details-card {
+    padding: 20px;
+  }
 }

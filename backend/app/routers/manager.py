@@ -135,3 +135,64 @@ def update_feedback_status(
     db.refresh(feedback)
 
     return feedback
+
+@router.delete("/feedback/{feedback_id}")
+def delete_feedback(
+    feedback_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != "manager":
+        raise HTTPException(
+            status_code=403,
+            detail="Only managers can delete feedback"
+        )
+
+    feedback = db.query(Feedback).filter(
+        Feedback.id == feedback_id
+    ).first()
+
+    if not feedback:
+        raise HTTPException(
+            status_code=404,
+            detail="Feedback not found"
+        )
+
+    db.delete(feedback)
+    db.commit()
+
+    return {
+        "message": "Feedback deleted successfully"
+    }
+
+@router.delete("/feedback/{feedback_id}/response/{response_id}")
+def delete_response(
+    feedback_id: int,
+    response_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != "manager":
+        raise HTTPException(
+            status_code=403,
+            detail="Only managers can delete responses"
+        )
+
+    response = db.query(ManagerResponse).filter(
+        ManagerResponse.id == response_id,
+        ManagerResponse.feedback_id == feedback_id,
+        ManagerResponse.manager_id == current_user.id
+    ).first()
+
+    if not response:
+        raise HTTPException(
+            status_code=404,
+            detail="Response not found"
+        )
+
+    db.delete(response)
+    db.commit()
+
+    return {
+        "message": "Response deleted successfully"
+    }

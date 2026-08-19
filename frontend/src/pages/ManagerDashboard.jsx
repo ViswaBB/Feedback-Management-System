@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   getAllFeedback,
-  getFeedback,
   updateFeedbackStatus,
   respondToFeedback,
+  deleteResponse,
 } from "../services/api";
+
 import "./ManagerDashboard.css";
 
 function ManagerDashboard() {
@@ -34,6 +36,10 @@ function ManagerDashboard() {
     }
   };
 
+  // -----------------------------
+  // UPDATE STATUS
+  // -----------------------------
+
   const handleStatusChange = async (status) => {
     try {
       await updateFeedbackStatus(
@@ -41,10 +47,10 @@ function ManagerDashboard() {
         status
       );
 
-      setSelectedFeedback({
-        ...selectedFeedback,
+      setSelectedFeedback((prev) => ({
+        ...prev,
         status: status,
-      });
+      }));
 
       setFeedback((prev) =>
         prev.map((item) =>
@@ -59,6 +65,10 @@ function ManagerDashboard() {
       alert(error.message);
     }
   };
+
+  // -----------------------------
+  // SEND RESPONSE
+  // -----------------------------
 
   const handleResponse = async () => {
     if (!responseText.trim()) {
@@ -77,10 +87,72 @@ function ManagerDashboard() {
       setResponseText("");
 
       await loadFeedback();
+
+      // Refresh selected feedback
+      const updatedFeedback = feedback.find(
+        (item) => item.id === selectedFeedback.id
+      );
+
+      if (updatedFeedback) {
+        setSelectedFeedback(updatedFeedback);
+      }
     } catch (error) {
       alert(error.message);
     }
   };
+
+  // -----------------------------
+  // DELETE RESPONSE
+  // -----------------------------
+
+  const handleDeleteResponse = async (responseId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this response?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await deleteResponse(
+        selectedFeedback.id,
+        responseId
+      );
+
+      alert("Response deleted successfully!");
+
+      setSelectedFeedback((prev) => ({
+        ...prev,
+        responses: (prev.responses || []).filter(
+          (response) =>
+            response.id !== responseId
+        ),
+      }));
+
+      setFeedback((prev) =>
+        prev.map((item) =>
+          item.id === selectedFeedback.id
+            ? {
+                ...item,
+                responses: (
+                  item.responses || []
+                ).filter(
+                  (response) =>
+                    response.id !== responseId
+                ),
+              }
+            : item
+        )
+      );
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  // -----------------------------
+  // LOGOUT
+  // -----------------------------
 
   const logout = () => {
     localStorage.removeItem("access_token");
@@ -89,34 +161,48 @@ function ManagerDashboard() {
     navigate("/login");
   };
 
-  const filteredFeedback = feedback.filter((item) => {
-    const matchesSearch =
-      item.title
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      item.description
-        .toLowerCase()
-        .includes(search.toLowerCase());
+  // -----------------------------
+  // SEARCH + FILTER
+  // -----------------------------
 
-    const matchesStatus =
-      statusFilter === "All" ||
-      item.status === statusFilter;
+  const filteredFeedback = feedback.filter(
+    (item) => {
+      const matchesSearch =
+        item.title
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        item.description
+          .toLowerCase()
+          .includes(search.toLowerCase());
 
-    return matchesSearch && matchesStatus;
-  });
+      const matchesStatus =
+        statusFilter === "All" ||
+        item.status === statusFilter;
+
+      return (
+        matchesSearch && matchesStatus
+      );
+    }
+  );
 
   if (loading) {
-    return <h2>Loading feedback...</h2>;
+    return (
+      <div className="manager-page">
+        <h2>Loading feedback...</h2>
+      </div>
+    );
   }
 
   return (
     <div className="manager-page">
 
-      {/* Header */}
+      {/* HEADER */}
+
       <div className="manager-header">
 
         <div>
           <h1>Manager Dashboard</h1>
+
           <p>
             Review and manage employee feedback.
           </p>
@@ -131,9 +217,8 @@ function ManagerDashboard() {
 
       </div>
 
-      <hr />
+      {/* TOOLBAR */}
 
-      {/* Search and Filter */}
       <div className="manager-toolbar">
 
         <input
@@ -151,6 +236,7 @@ function ManagerDashboard() {
             setStatusFilter(e.target.value)
           }
         >
+
           <option value="All">
             All Statuses
           </option>
@@ -170,93 +256,148 @@ function ManagerDashboard() {
           <option value="Resolved">
             Resolved
           </option>
+
         </select>
 
       </div>
 
-      <p>
+      <p className="feedback-count">
         Showing {filteredFeedback.length} of{" "}
         {feedback.length} feedback items
       </p>
 
-      {/* Feedback List */}
+      {/* FEEDBACK LIST */}
+
       {filteredFeedback.length === 0 ? (
-        <p>No feedback found.</p>
-      ) : (
-        filteredFeedback.map((item) => (
-          <div
-            className="manager-card"
-            key={item.id}
-          >
 
-            <h3>{item.title}</h3>
-
-            <p>
-              <strong>Category:</strong>{" "}
-              {item.category}
-            </p>
-
-            <p>
-              <strong>Status:</strong>{" "}
-
-              <span
-                className={`status ${
-                  item.status === "Pending"
-                    ? "status-pending"
-                    : item.status === "Under Review"
-                    ? "status-review"
-                    : item.status === "Responded"
-                    ? "status-responded"
-                    : "status-resolved"
-                }`}
-              >
-                {item.status}
-              </span>
-
-            </p>
-
-      <button
-        onClick={() => {
-          setSelectedFeedback(item);
-          setResponseText("");
-        }}
-      >
-        View Feedback
-      </button>
-
-          </div>
-        ))
-      )}
-
-      {/* Feedback Details */}
-      {selectedFeedback && (
-        <div className="manager-card">
-
-          <h2>Feedback Details</h2>
-
-          <h3>
-            {selectedFeedback.title}
-          </h3>
+        <div className="empty-state">
+          <h3>No feedback found</h3>
 
           <p>
-            <strong>Category:</strong>{" "}
+            Try changing your search or filter.
+          </p>
+        </div>
+
+      ) : (
+
+        <div className="feedback-list">
+
+          {filteredFeedback.map((item) => (
+
+            <div
+              className="manager-card"
+              key={item.id}
+            >
+
+              <div className="card-header">
+
+                <h3>
+                  {item.title}
+                </h3>
+
+                <span
+                  className={`status ${
+                    item.status === "Pending"
+                      ? "status-pending"
+                      : item.status ===
+                        "Under Review"
+                      ? "status-review"
+                      : item.status ===
+                        "Responded"
+                      ? "status-responded"
+                      : "status-resolved"
+                  }`}
+                >
+                  {item.status}
+                </span>
+
+              </div>
+
+              <p>
+                <strong>
+                  Category:
+                </strong>{" "}
+                {item.category}
+              </p>
+
+              <p className="feedback-description">
+                {item.description}
+              </p>
+
+              <button
+                className="view-btn"
+                onClick={() => {
+                  setSelectedFeedback(item);
+                  setResponseText("");
+                }}
+              >
+                View Feedback
+              </button>
+
+            </div>
+
+          ))}
+
+        </div>
+      )}
+
+      {/* FEEDBACK DETAILS */}
+
+      {selectedFeedback && (
+
+        <div className="details-card">
+
+          <div className="details-header">
+
+            <div>
+              <h2>
+                Feedback Details
+              </h2>
+
+              <h3>
+                {selectedFeedback.title}
+              </h3>
+            </div>
+
+            <button
+              className="close-btn"
+              onClick={() =>
+                setSelectedFeedback(null)
+              }
+            >
+              ✕
+            </button>
+
+          </div>
+
+          <hr />
+
+          <p>
+            <strong>
+              Category:
+            </strong>{" "}
             {selectedFeedback.category}
           </p>
 
           <p>
-            <strong>Description:</strong>
+            <strong>
+              Description:
+            </strong>
           </p>
 
-          <p>
+          <p className="details-description">
             {selectedFeedback.description}
           </p>
 
           <p>
-            <strong>Status:</strong>{" "}
+            <strong>
+              Status:
+            </strong>{" "}
 
             <span
               className={`status ${
-                selectedFeedback.status === "Pending"
+                selectedFeedback.status ===
+                "Pending"
                   ? "status-pending"
                   : selectedFeedback.status ===
                     "Under Review"
@@ -269,21 +410,29 @@ function ManagerDashboard() {
             >
               {selectedFeedback.status}
             </span>
+
           </p>
 
           <hr />
 
-          {/* Status Update */}
-          <h3>Update Status</h3>
+          {/* STATUS UPDATE */}
+
+          <h3>
+            Update Status
+          </h3>
 
           <select
-            value={selectedFeedback.status}
+            className="status-select"
+            value={
+              selectedFeedback.status
+            }
             onChange={(e) =>
               handleStatusChange(
                 e.target.value
               )
             }
           >
+
             <option value="Pending">
               Pending
             </option>
@@ -299,14 +448,78 @@ function ManagerDashboard() {
             <option value="Resolved">
               Resolved
             </option>
+
           </select>
 
           <hr />
 
-          {/* Manager Response */}
-          <h3>Respond to Employee</h3>
+          {/* EXISTING RESPONSES */}
+
+          <h3>
+            Manager Responses
+          </h3>
+
+          {selectedFeedback.responses &&
+          selectedFeedback.responses.length >
+            0 ? (
+
+            <div className="responses-list">
+
+              {selectedFeedback.responses.map(
+                (response) => (
+
+                  <div
+                    className="response-box"
+                    key={response.id}
+                  >
+
+                    <p>
+                      {response.response_text}
+                    </p>
+
+                    <small>
+                      Responded on{" "}
+                      {new Date(
+                        response.created_at
+                      ).toLocaleString()}
+                    </small>
+
+                    <button
+                      className="delete-response-btn"
+                      onClick={() =>
+                        handleDeleteResponse(
+                          response.id
+                        )
+                      }
+                    >
+                      Delete Response
+                    </button>
+
+                  </div>
+
+                )
+              )}
+
+            </div>
+
+          ) : (
+
+            <p className="no-response">
+              No response yet.
+            </p>
+
+          )}
+
+          <hr />
+
+          {/* NEW RESPONSE */}
+
+          <h3>
+            Respond to Employee
+          </h3>
 
           <textarea
+            className="response-input"
             rows="5"
             value={responseText}
             onChange={(e) =>
@@ -317,29 +530,19 @@ function ManagerDashboard() {
             placeholder="Write your response..."
           />
 
-          <br />
-          <br />
-
-          <button onClick={handleResponse}>
+          <button
+            className="send-response-btn"
+            onClick={handleResponse}
+          >
             Send Response
           </button>
 
-          <br />
-          <br />
-
-          <button
-            onClick={() =>
-              setSelectedFeedback(null)
-            }
-          >
-            Close
-          </button>
-
         </div>
+
       )}
 
     </div>
   );
 }
 
-export default ManagerDashboard; 
+export default ManagerDashboard;
